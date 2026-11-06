@@ -1,13 +1,13 @@
 package main
 
 import (
-	"go-api/presentation/controller/ProductController"
-	"go-api/db"
-	"go-api/infra/repositories/ProductRepository"
-	"go-api/application/useCases/ProductUseCases"
+	"go-api/application/useCases"
+	"go-api/infra/db"
+	"go-api/infra/repositories"
+	"go-api/presentation"
 	"github.com/gin-gonic/gin"
 )
-	
+
 func main() {
 	server := gin.Default()
 
@@ -16,9 +16,9 @@ func main() {
 		panic(err)
 	}
 
-	ProductRepository := repository.NewProductRepository(dbConnection)
-	ProductUseCase := usecase.NewProductUseCase(ProductRepository)
-	ProductController := controller.NewProductController(ProductUseCase)
+	productRepository := repository.NewProductRepository(dbConnection)
+	productUseCase := useCases.NewProductUseCase(productRepository)
+	productController := controller.NewProductController(productUseCase)
 
 	server.GET("/ping", func(ctx *gin.Context) {
 		ctx.JSON(200, gin.H{
@@ -26,9 +26,9 @@ func main() {
 		})
 	})
 
-	server.GET("/products", ProductController.GetProducts)
-	server.POST("/product", ProductController.CreateProduct)
-	server.GET("/product/:productId", ProductController.GetProductById)
+	server.GET("/products", productController.GetProducts)
+	server.POST("/product", productController.CreateProduct)
+	server.GET("/product/:productId", productController.GetProductById)
 
 	server.Run(":8000")
 }
